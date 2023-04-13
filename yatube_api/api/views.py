@@ -10,25 +10,18 @@ from .serializers import (FollowSerializer,
                           PostSerializer,
                           GroupSerializer,
                           CommentSerializer)
-from .permissions import AuthorOrReadOnly
+from .permissions import AuthorIsReadOnly
 from posts.models import Group, Post, Follow
-
-
-class CreateListViewSet(mixins.CreateModelMixin,
-                        mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin,
-                        viewsets.GenericViewSet):
-    pass
 
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly, AuthorOrReadOnly
+        permissions.IsAuthenticatedOrReadOnly, AuthorIsReadOnly
     ]
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('group', )
+    filterset_fields = ('group',)
     pagination_class = pagination.LimitOffsetPagination
 
     def perform_create(self, serializer):
@@ -39,12 +32,12 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['title', ]
+    search_fields = ['title']
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [AuthorOrReadOnly]
+    permission_classes = [AuthorIsReadOnly]
 
     def get_post(self):
         return get_object_or_404(
